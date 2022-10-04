@@ -1,0 +1,128 @@
+.mat-divider-vertical {
+    height: 100%;
+    width: 0px !important;
+    position: inherit !important;
+}
+
+::ng-deep a.task {
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    padding: 0 8px;
+    margin: 2px 0.25em;
+    cursor: pointer;
+    border-radius: 2px;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.23);
+    z-index: 2;
+}
+
+::ng-deep a.task.selected {
+    background: rgba(4, 92, 255, 1) !important;
+    color: #fff !important;
+}
+
+::ng-deep a.task.startable {
+    background: #bdbdbd;
+    color: #000;
+}
+
+::ng-deep a.task.started {
+    background: #ffee58;
+    color: #000;
+}
+
+::ng-deep a.task.completed {
+    background: #9ccc65;
+    color: #000;
+}
+
+::ng-deep a.task.tested {
+    background: #ce93d8;
+    color: #000;
+}
+::ng-deep a.task.paused {
+    background: #bdbdbd;
+    color: #000;
+}
+::ng-deep a.task.wait {
+    background: #ff8a65;
+    color: #000;
+}
+
+::ng-deep a.task span.task-info {
+    display: inline-flex;
+    background-color: rgba(0, 0, 0, 0.23);
+    border-radius: 100%;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    margin: 4px 8px 4px 8px;
+    font-size: 10px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+::ng-deep a.task .task-effort {
+    position: absolute;
+    right: -12px;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    font-size: 8px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    background: rgba(0, 0, 0, 0.27);
+    border-radius: 100%;
+    top: -2px;
+}
+
+::ng-deep a.task .task-priority {
+    position: absolute;
+    right: -12px;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    font-size: 12px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    background: rgba(0, 0, 0, 0);
+    border-radius: 100%;
+    bottom: -3px;
+}
+
+.truncate {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+::ng-deep .line {
+    position: absolute;
+    height: 1px;
+    border-top: 3px dotted rgba(4, 92, 255, .77);
+    width: 100px;
+    z-index: 999;
+    visibility: hidden;
+    z-index: 1;
+}
+
+::ng-deep .line .arrow {
+    display: none;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 8px solid rgba(4, 92, 255, .57);
+    position: absolute;
+    right: -4px;
+    bottom: -2px;
+}

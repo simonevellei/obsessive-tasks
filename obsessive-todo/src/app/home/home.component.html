@@ -1,0 +1,204 @@
+<div fxLayout="column" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden;">
+    <mat-toolbar color="primary" style="z-index: 9">
+        <mat-toolbar-row>
+            <button mat-icon-button matTooltip="Bold (control+B)" (click)="execCommand('bold')">
+                <mat-icon>format_bold</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Italic (control+I)" (click)="execCommand('italic')">
+                <mat-icon>format_italic</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Title (control+1)" (click)="execCommand('formatBlock', 'H1')">
+                <mat-icon>title</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Sub-title (control+2)" (click)="execCommand('formatBlock', 'H2')">
+                <mat-icon>format_size</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Text (control+3)" (click)="clearFormatting('h1,h2,h3,h4,h5,h6')">
+                <mat-icon>format_clear</mat-icon>
+            </button>
+
+            <mat-divider vertical="true"></mat-divider>
+
+            <button mat-icon-button matTooltip="List (control+Enter)" (click)="execCommand('insertUnorderedList')">
+                <mat-icon>format_list_bulleted</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Increse indent (Tab)" (click)="execCommand('indent')">
+                <mat-icon>format_indent_increase</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Decrease indent (shift+Tab)" (click)="execCommand('outdent')">
+                <mat-icon>format_indent_decrease</mat-icon>
+            </button>
+
+            <mat-divider vertical="true"></mat-divider>
+
+            <button mat-icon-button matTooltip="Assign task (ctrl+K)" (click)="assignTask()">
+                <mat-icon>content_paste</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Deassign task" (click)="deassignTask()">
+                <mat-icon>content_paste_off</mat-icon>
+            </button>
+            <mat-divider vertical="true"></mat-divider>
+
+            <span fxFlex></span>
+            <span *ngIf="saving" class="mat-caption" style="padding: 0 16px">saving...</span>
+
+        </mat-toolbar-row>
+    </mat-toolbar>
+    <div fxFlex style="overflow: hidden" fxLayout="row">
+        <div fxFlex style="overflow: auto" fxLayout="row" #scroller (scroll)="setupTaskComponent()">
+            <div fxFlex #taskEditor (keyup)="setupTaskComponent()" (click)="setupTaskComponent()" contenteditable="true"
+                style="border: 0px; outline: 0px; padding : 16px">
+
+            </div>
+        </div>
+        <div style="min-width: 33%; max-width: 33%; background: #f1f1f1;" fxLayout="column">
+            <div fxFlex *ngIf="!taskMap['selected']" fxLayout="column">
+
+                <mat-tab-group [(selectedIndex)]="tabIndex">
+                    <mat-tab label="Taskers">
+
+                    </mat-tab>
+                    <mat-tab label="Topics">
+
+                    </mat-tab>
+                </mat-tab-group>
+
+                <div style="padding: 16px; overflow: auto" fxFlex *ngIf="tabIndex == 0">
+
+                    <div *ngFor="let entry of groupedTasks | keyvalue" style="margin-bottom: 2em">
+                        <h1 class="mat-title">{{entry.key}} ({{entry.value.totalEffort}} remaining)</h1>
+                        <mat-list>
+                            <ng-container *ngIf="entry.value.nextTasks > 0">
+                                <h3 mat-subheader>Next tasks</h3>
+                                <ng-container *ngFor="let task of entry.value.tasks">
+                                    <mat-list-item *ngIf="task.dependenciesSolved">
+                                        <span mat-list-icon *ngIf="task.priorityInfo">{{task.priorityInfo.icon}}</span>
+                                        <h4 mat-line><a href="" (click)="goToTask($event, task)">{{task.title}}</a></h4>
+                                        <p mat-line>effort {{task.effort}} &mdash; <span
+                                                *ngIf="task.statusInfo">{{task.statusInfo.name}}</span> </p>
+                                    </mat-list-item>
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="entry.value.blockedTasks > 0">
+                                <h3 mat-subheader>Blocked tasks</h3>
+                                <ng-container *ngFor="let task of entry.value.tasks">
+                                    <mat-list-item *ngIf="!task.dependenciesSolved">
+                                        <span mat-list-icon *ngIf="task.priorityInfo">{{task.priorityInfo.icon}}</span>
+                                        <h4 mat-line><a href="" (click)="goToTask($event, task)">{{task.title}}</a></h4>
+                                        <p mat-line>effort {{task.effort}} &mdash; <span
+                                                *ngIf="task.statusInfo">{{task.statusInfo.name}}</span> </p>
+                                    </mat-list-item>
+                                </ng-container>
+                            </ng-container>
+                        </mat-list>
+                    </div>
+                </div>
+
+
+                <div style="padding: 16px; overflow: auto" fxFlex *ngIf="tabIndex == 1">
+
+                    <div *ngFor="let entry of groupedTopics | keyvalue" style="margin-bottom: 2em">
+                        <h1 class="mat-title">{{entry.key}} ({{entry.value.remainingEffort}} remaining)</h1>
+                        <mat-list>
+                            <ng-container *ngIf="entry.value.nextTasks > 0">
+                                <h3 mat-subheader>Next tasks</h3>
+                                <ng-container *ngFor="let task of entry.value.tasks">
+                                    <mat-list-item *ngIf="task.dependenciesSolved">
+                                        <span mat-list-icon *ngIf="task.priorityInfo">{{task.priorityInfo.icon}}</span>
+                                        <h4 mat-line><a href="" (click)="goToTask($event, task)">{{task.title}}</a></h4>
+                                        <p mat-line>{{!task.owner?'Not assigned':task.owner.name}} &mdash; effort {{task.effort}} &mdash; <span
+                                                *ngIf="task.statusInfo">{{task.statusInfo.name}}</span> </p>
+                                    </mat-list-item>
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="entry.value.blockedTasks > 0">
+                                <h3 mat-subheader>Blocked tasks</h3>
+                                <ng-container *ngFor="let task of entry.value.tasks">
+                                    <mat-list-item *ngIf="!task.dependenciesSolved">
+                                        <span mat-list-icon *ngIf="task.priorityInfo">{{task.priorityInfo.icon}}</span>
+                                        <h4 mat-line><a href="" (click)="goToTask($event, task)">{{task.title}}</a></h4>
+                                        <p mat-line>{{!task.owner?'Not assigned':task.owner.name}} effort {{task.effort}} &mdash; <span
+                                            *ngIf="task.statusInfo">{{task.statusInfo.name}}</span> </p>
+                                    </mat-list-item>
+                                </ng-container>
+                            </ng-container>
+                        </mat-list>
+                    </div>
+                </div>
+            </div>
+            <div fxFlex *ngIf="taskMap['selected']" style="padding: 16px; position: relative;" fxLayout="column">
+                <button mat-icon-button (click)="unselectTask()" style="position: absolute; top: 0; right: 0;">
+                    <mat-icon>close</mat-icon>
+                </button>
+                <small class="mat-caption" style="margin: 0; padding: 0; line-height: 1em; color: rgba(0,0,0,.37)"
+                    *ngIf="taskMap['selected'].section">{{taskMap['selected'].section}}</small>
+                <h1 class="mat-display-1 truncate" style="margin: 0 0 1em 0; padding: 0">{{taskMap['selected'].title}}
+                </h1>
+                <div fxFlex style="overflow: auto" fxLayout="column">
+                    <mat-form-field>
+                        <mat-label>Owner</mat-label>
+                        <mat-select [compareWith]="compareOwners" [(ngModel)]="taskMap['selected'].owner"
+                            (selectionChange)="setupTaskComponent()">
+                            <mat-option [value]="null">
+                                <em>Nessuno</em>
+                            </mat-option>
+                            <mat-option *ngFor="let owner of owners" [value]="owner">
+                                <div fxLayout="row" fxLayoutAlign="center center">
+                                    <div style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; font-size: 10px; margin-right: 8px; border-radius: 100%; background: #cacaca;"
+                                        fxLayout="row" fxLayoutAlign="center center">{{owner.monogram}}</div>
+                                    <div fxFlex>&mdash;{{owner.name}}</div>
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                        <button mat-icon-button matSuffix (click)="$event.preventDefault()">
+                            <mat-icon>person_add</mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Status</mat-label>
+                        <mat-select [(ngModel)]="taskMap['selected'].status" (selectionChange)="setupTaskComponent()">
+                            <mat-option *ngFor="let status of statuses" [value]="status.code">
+                                <div fxLayout="row" fxLayoutAlign="center center">
+                                    <div style="min-width: 10px; min-height: 10px; margin-right: 8px; border-radius: 100%"
+                                        [style.background]="status.color"></div>
+                                    <div fxFlex>{{status.name}}</div>
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Effort</mat-label>
+                        <mat-select [(ngModel)]="taskMap['selected'].effort" (selectionChange)="setupTaskComponent()">
+                            <mat-option *ngFor="let effort of efforts" [value]="effort.value">
+                                {{effort.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Priority</mat-label>
+                        <mat-select [(ngModel)]="taskMap['selected'].priority" (selectionChange)="setupTaskComponent()">
+                            <mat-option *ngFor="let priority of priorities" [value]="priority.value">
+                                {{priority.icon}} - {{priority.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Dependencies</mat-label>
+                        <mat-select [compareWith]="compareTasks" [(ngModel)]="taskMap['selected'].dependencies" multiple
+                            (selectionChange)="setupTaskComponent()">
+                            <ng-container *ngFor="let entry of sortedDependenciesByTask(taskMap['selected'])">
+                                <mat-option [value]="entry.id">{{entry.title}}</mat-option>
+                            </ng-container>
+                        </mat-select>
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
